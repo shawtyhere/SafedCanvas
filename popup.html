@@ -1,0 +1,273 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>SafeCanvas</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 320px;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+      background: #ffffff;
+      color: #1a1a1a;
+      font-size: 14px;
+    }
+
+    /* ── Header ── */
+    .header {
+      background: #1a1a2e;
+      padding: 18px 20px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .shield-icon {
+      width: 38px; height: 38px;
+      background: rgba(255,255,255,0.12);
+      border-radius: 10px;
+      display: flex; align-items: center; justify-content: center;
+      font-size: 19px;
+      flex-shrink: 0;
+    }
+
+    .header-text h1 {
+      font-size: 15px;
+      font-weight: 600;
+      color: #ffffff;
+      letter-spacing: -0.01em;
+    }
+
+    .header-text p {
+      font-size: 11px;
+      color: rgba(255,255,255,0.55);
+      margin-top: 2px;
+    }
+
+    /* ── Toggle row ── */
+    .toggle-row {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 14px 20px;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .toggle-label {
+      font-size: 13px;
+      font-weight: 500;
+      color: #1a1a1a;
+    }
+
+    .toggle-sub {
+      font-size: 11px;
+      color: #888;
+      margin-top: 1px;
+    }
+
+    /* Toggle switch */
+    .switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+    .switch input { opacity: 0; width: 0; height: 0; }
+    .slider {
+      position: absolute; cursor: pointer;
+      inset: 0;
+      background: #d1d5db;
+      border-radius: 99px;
+      transition: background 0.2s;
+    }
+    .slider::before {
+      content: '';
+      position: absolute;
+      width: 18px; height: 18px;
+      left: 3px; top: 3px;
+      background: white;
+      border-radius: 50%;
+      transition: transform 0.2s;
+      box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+    }
+    input:checked + .slider { background: #e53e3e; }
+    input:checked + .slider::before { transform: translateX(18px); }
+
+    /* ── Stats ── */
+    .stats {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1px;
+      background: #f0f0f0;
+      border-bottom: 1px solid #f0f0f0;
+    }
+
+    .stat-cell {
+      background: #fff;
+      padding: 14px 20px;
+      text-align: center;
+    }
+
+    .stat-num {
+      font-size: 26px;
+      font-weight: 700;
+      line-height: 1;
+      margin-bottom: 4px;
+    }
+
+    .stat-cell:first-child .stat-num { color: #e53e3e; }
+    .stat-cell:last-child .stat-num { color: #d69e2e; }
+
+    .stat-label {
+      font-size: 11px;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+    }
+
+    /* ── Coverage list ── */
+    .section-title {
+      font-size: 11px;
+      font-weight: 600;
+      color: #888;
+      text-transform: uppercase;
+      letter-spacing: 0.06em;
+      padding: 14px 20px 8px;
+    }
+
+    .site-list {
+      padding: 0 20px 4px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .site-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+      color: #444;
+    }
+
+    .site-dot {
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: #48bb78;
+      flex-shrink: 0;
+    }
+
+    /* ── Footer ── */
+    .footer {
+      padding: 14px 20px;
+      border-top: 1px solid #f0f0f0;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 600;
+      padding: 4px 10px;
+      border-radius: 99px;
+      background: #f0fff4;
+      color: #276749;
+      border: 1px solid #c6f6d5;
+    }
+
+    .status-badge.off {
+      background: #fff5f5;
+      color: #9b2c2c;
+      border-color: #fed7d7;
+    }
+
+    .reset-btn {
+      font-size: 11px;
+      color: #888;
+      background: none;
+      border: none;
+      cursor: pointer;
+      text-decoration: underline;
+    }
+
+    .reset-btn:hover { color: #444; }
+
+    /* ── Categories ── */
+    .cat-list {
+      padding: 0 20px 14px;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 6px;
+    }
+
+    .cat-chip {
+      font-size: 11px;
+      padding: 3px 9px;
+      border-radius: 99px;
+      background: #fff5f5;
+      color: #c53030;
+      border: 1px solid #fed7d7;
+      font-weight: 500;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="shield-icon">🛡️</div>
+    <div class="header-text">
+      <h1>SafeCanvas</h1>
+      <p>AI Safety Guard — all sites protected</p>
+    </div>
+  </div>
+
+  <div class="toggle-row">
+    <div>
+      <div class="toggle-label">Protection active</div>
+      <div class="toggle-sub" id="toggleSub">Blocking harmful prompts</div>
+    </div>
+    <label class="switch">
+      <input type="checkbox" id="enableToggle" checked />
+      <span class="slider"></span>
+    </label>
+  </div>
+
+  <div class="stats">
+    <div class="stat-cell">
+      <div class="stat-num" id="blockCount">0</div>
+      <div class="stat-label">Blocked</div>
+    </div>
+    <div class="stat-cell">
+      <div class="stat-num" id="warnCount">0</div>
+      <div class="stat-label">Flagged</div>
+    </div>
+  </div>
+
+  <div class="section-title">Blocks these categories</div>
+  <div class="cat-list">
+    <span class="cat-chip">Sexual content</span>
+    <span class="cat-chip">Child exploitation</span>
+    <span class="cat-chip">Non-consensual</span>
+    <span class="cat-chip">Violence</span>
+    <span class="cat-chip">Dehumanising</span>
+    <span class="cat-chip">Abusive language</span>
+    <span class="cat-chip">Coded language</span>
+  </div>
+
+  <div class="section-title">Active on AI tools including</div>
+  <div class="site-list">
+    <div class="site-row"><div class="site-dot"></div> Midjourney (Discord & web)</div>
+    <div class="site-row"><div class="site-dot"></div> Adobe Firefly</div>
+    <div class="site-row"><div class="site-dot"></div> DALL·E / ChatGPT</div>
+    <div class="site-row"><div class="site-dot"></div> Stable Diffusion web UIs</div>
+    <div class="site-row"><div class="site-dot"></div> RunwayML, Pika, Kling</div>
+    <div class="site-row"><div class="site-dot"></div> Leonardo AI, NightCafe</div>
+    <div class="site-row"><div class="site-dot"></div> Any site with a prompt box</div>
+  </div>
+
+  <div class="footer">
+    <span class="status-badge" id="statusBadge">● Shield ON</span>
+    <button class="reset-btn" id="resetBtn">Reset counts</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
